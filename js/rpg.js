@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'rpg', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'rpg', { preload: preload, create: create, update: update, render: render });
 var map;
 var layer;
 var przeszkody;
@@ -11,24 +11,33 @@ var cursors;
 var hud;
 var sprint = 100;
 var sprintText;
-
+var health = 100;
+var healthText, hurtItem, hurtFlower;
 function preload() {
 	game.load.spritesheet('player', 'assets/player.png', 32, 32);
 	
 	//tileset preload
 	game.load.tilemap('map', 'assets/map.json', null, Phaser.Tilemap.TILED_JSON);
 	game.load.image('tiles', 'assets/tileset.png');
-	game.load.image('panel', 'assets/panel.png');
+	game.load.image('hurtFlower', 'assets/hurtFlower.png');
 }
 
 function create() {
 	loadMap();
+	
+	hurtItem = game.add.group();
+	hurtItem.enableBody = true;
+	hurtFlower = hurtItem.create (93, 382, 'hurtFlower');
+	
 	createPlayer();
 	gui();
+	
+	
 }
 
 function update() {
 	movePlayer();
+	
 	if (runKey.isDown){
 		if (cursors.left.isDown || cursors.right.isDown || cursors.up.isDown || cursors.down.isDown || leftKey.isDown || rightKey.isDown || upKey.isDown || downKey.isDown) {
 			if (sprint > 0){
@@ -39,6 +48,9 @@ function update() {
 			}
 		}
 	}
+	
+	game.physics.arcade.overlap(player, hurtItem, hurtItemKill, null, this);
+	hurtItemKill();
 }
 
 
@@ -172,5 +184,17 @@ function gui() {
 	sprintText = game.add.text(10, 550, 'Energy: full' , {font: '25px Arial'});
 	sprintText.fixedToCamera = true;
 	
+	healthText = game.add.text(10, 520, 'Health: 100%', {font: '25px Arial'});
+	healthText.fixedToCamera = true;
+}
+
+function hurtItemKill(player, hurtItem){
+	console.log('It works!');
+	hurtFlower.kill();
 	
 }
+function render() {
+    game.debug.cameraInfo(game.camera, 32, 32);
+    game.debug.spriteCoords(player, 32, 500);
+}
+
